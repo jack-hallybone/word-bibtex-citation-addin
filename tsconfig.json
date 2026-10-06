@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    // The syntax floor: vite.config.ts builds to it and tests/artefact.test.ts verifies the shipped chunk against it, since tsc's noEmit never enforces it.
+    "target": "ES2019",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    // The API floor must not run ahead of the syntax one: downlevelling rewrites syntax, it doesn't add missing APIs.
+    "lib": ["ES2019", "DOM", "DOM.Iterable"],
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "exactOptionalPropertyTypes": true,
+    "noUncheckedIndexedAccess": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "types": ["office-js"],
+    "noEmit": true
+  },
+  "include": ["src/**/*"]
+}

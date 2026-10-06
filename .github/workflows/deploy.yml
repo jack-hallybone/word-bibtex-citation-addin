@@ -1,0 +1,67 @@
+name: Deploy to GitHub Pages
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches: [main]
+
+permissions: {}
+
+jobs:
+  build:
+    name: Build and verify
+    concurrency:
+      group: ci-${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+
+    permissions:
+      contents: read
+      pages: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Only a release is stamped (every other build keeps taskpane.html's "v. dev"), on the source file before the build, as across the fleet.
+      - name: Stamp version
+        run: sed -i 's|<span id="version">v. dev</span>|<span id="version">v. '"$(date -u '+%Y-%m-%d %H:%M:%S UTC')"'</span>|' src/taskpane/taskpane.html
+
+      # Must precede verify: it supplies VITE_SITE_URL, without which the build refuses to emit a manifest at all.
+      - name: Set up GitHub Pages
+        id: pages
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+
+      # No native Node setup here: verify runs entirely inside the same pinned container compose.yaml and agents use — one environment for everyone, not three.
+      - name: Verify
+        run: docker compose run --rm verify
+        env:
+          VITE_SITE_URL: ${{ steps.pages.outputs.base_url }}
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: ./dist
+
+  deploy:
+    name: Deploy
+    needs: build
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5.0.0

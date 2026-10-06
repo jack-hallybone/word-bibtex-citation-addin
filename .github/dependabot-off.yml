@@ -1,0 +1,29 @@
+# Switched off: GitHub only reads .github/dependabot.yml, so under this name Dependabot runs nothing. To switch version updates on, rename this file to dependabot.yml. Security updates don't need this file: they're a separate switch in the repository's settings.
+# Before switching the images on, name Node's full version in its tag (for example 24.21.0-bookworm-slim, matching the Node inside the pinned image): with only 24 in the tag, Dependabot sees Node's security releases just as digest changes, which GitHub may suppress.
+# Dependabot can't update these pins, so they're changed by hand:
+# - The Lucide icon in public/assets/icon-source.svg (and the icon PNGs rasterised from it), from lucide-static 1.41.0: recopy it from one release, re-rasterise the PNGs, and update the version in it and THIRD-PARTY-NOTICES.md.
+# - The citation styles and locales in public/assets/csl/, byte-identical copies of the CSL project's files with SHA-256 hashes in src/csl-styles.js, both copied in from reference-manager/bib-core: replace a file whole from upstream in bib-core's csl/, never edit it, update its hash in bib-core's src/csl-styles.mjs, and run npm run sync:bib-core.
+# - The overrides in package.json (adm-zip, fast-uri), which force versions deep in the tree: version updates never change them, only security updates do. Change one by hand, then run `docker compose run --rm build npm install --package-lock-only`.
+# - The OS release in the Node image's tag, bookworm (Debian 12, on long-term support until 30 June 2028): Dependabot only offers tags on the same release, so moving to a newer one is a hand edit to compose.yaml.
+# - The runner, ubuntu-24.04 in .github/workflows/deploy.yml: GitHub keeps it patched, but move it to a newer Ubuntu before GitHub retires it.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: monthly
+    # One pull request for every minor and patch bump; each major gets its own, so one breaking release can't hold back the rest.
+    groups:
+      npm:
+        patterns: ["*"]
+        update-types: [minor, patch]
+
+  - package-ecosystem: docker-compose
+    directory: /
+    schedule:
+      interval: monthly
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly

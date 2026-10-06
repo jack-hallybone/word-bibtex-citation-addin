@@ -1,0 +1,21 @@
+# Build output
+dist/
+
+# Dependencies
+node_modules
+
+# Secrets — never commit these; `.npmrc` is committed on purpose and carries only `ignore-scripts=true`, never a registry token.
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+
+# OS and editor cruft
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+.claude/

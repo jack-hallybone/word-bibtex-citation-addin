@@ -1,0 +1,414 @@
+{
+  "$comment": [
+    "Shared citation-key contract between lit-downloader and word-bibtex-citation-addin (BibCite).",
+    "Canonical in reference-manager's bib-core/, vendored byte-identical at tests/citekey-conformance.json",
+    "in lit-downloader and BibCite alike, each re-synced by its own npm run sync:bib-core. Keep all three",
+    "in lockstep, never one alone, and run both suites before landing: BibCite refuses a whole",
+    "library over one bad key, and lit-downloader's parser runs on every save, so any",
+    "disagreement means one tool silently stops working on files the other accepts. Copy this",
+    "file, not the regex: two hand-maintained copies of a literal drift, and one already did.",
+    "accept: the key is valid under its exact text, parsed and indexed verbatim by",
+    "lit-downloader, accepted into a citation tag by BibCite.",
+    "reject: the key is never valid under this exact text. BibCite rejects every such key",
+    "outright. For lit-downloader's file parser, `mode` says which behaviour BibTeX's own",
+    "grammar requires: 'refuse' means the character cannot be read back at all, so the whole",
+    "file is refused; 'terminate' means the character ENDS the key, so the shorter key in",
+    "`reads` is parsed instead (BibTeX reads the same shorter key; refusing would reject",
+    "valid files).",
+    "Invisible rejected characters appear as \\u escapes, by design.",
+    "Two kinds of character are barred beyond the structural ones. INVISIBLE characters take no",
+    "width, so they hide or reorder what surrounds them. BLANK GLYPHS take width and draw",
+    "nothing, so a key can pad itself into the appearance of another. Whitespace is the familiar",
+    "blank glyph and BibTeX ends a key at it; U+2800 BRAILLE PATTERN BLANK is the one that is",
+    "neither whitespace nor default-ignorable, and closing that gap is why this file grew its",
+    "braille cases.",
+    "Keys must also already be NFC; cafe plus a combining acute is rejected.",
+    "RESERVED NAMES: a key that names a member of JavaScript's Object.prototype (or",
+    "'prototype') cannot be held as data by a record keyed on it, so BibCite refuses the",
+    "whole library. Both tools now refuse such a key on read, and the writer never emits",
+    "one; the cases below are the runtime's own list, spelled out so a host with a",
+    "different Object.prototype still agrees with the file."
+  ],
+  "accept": [
+    {
+      "key": "smith2024",
+      "why": "plain author-year"
+    },
+    {
+      "key": "einstein1905",
+      "why": "plain author-year"
+    },
+    {
+      "key": "smith2024attention",
+      "why": "author-year-title, what lit-downloader emits"
+    },
+    {
+      "key": "DBLP:conf/icml/SmithJ20",
+      "why": "DBLP export: colon and slashes"
+    },
+    {
+      "key": "knuth:1984",
+      "why": "colon without DBLP's slashes"
+    },
+    {
+      "key": "Smith.2024",
+      "why": "Better BibTeX dotted style"
+    },
+    {
+      "key": "2103.14030",
+      "why": "arXiv id used as the key"
+    },
+    {
+      "key": "10.1000/xyz123",
+      "why": "DOI used as the key"
+    },
+    {
+      "key": "M\u00fcller2020",
+      "why": "non-ASCII: biber handles UTF-8 keys"
+    },
+    {
+      "key": "Fran\u00e7ois-Xavier2021",
+      "why": "accented and hyphenated"
+    },
+    {
+      "key": "\u5f20\u4f1f2019",
+      "why": "non-Latin script"
+    },
+    {
+      "key": "\u91ce\u53e32020",
+      "why": "non-Latin script"
+    },
+    {
+      "key": "smith+doe2024",
+      "why": "plus-joined multi-author style"
+    },
+    {
+      "key": "a+b",
+      "why": "plus sign, minimal"
+    },
+    {
+      "key": "smith-doe-2024",
+      "why": "hyphenated"
+    },
+    {
+      "key": "smith_doe_2024",
+      "why": "underscored"
+    },
+    {
+      "key": "smith_2020-v2",
+      "why": "underscore, hyphen and a version tail"
+    },
+    {
+      "key": "O'Neill2019",
+      "why": "apostrophe"
+    },
+    {
+      "key": "a(b)c2024",
+      "why": "parentheses are ordinary characters in a key"
+    },
+    {
+      "key": "entry(2020)",
+      "why": "parenthesised year"
+    },
+    {
+      "key": "key[1]",
+      "why": "brackets"
+    },
+    {
+      "key": "key|pipe",
+      "why": "pipe"
+    },
+    {
+      "key": "key;semicolon",
+      "why": "semicolon"
+    },
+    {
+      "key": "100%key",
+      "why": "percent is not BibTeX syntax inside an entry"
+    },
+    {
+      "key": "key!#$%&*2024",
+      "why": "punctuation BibTeX does not reserve"
+    },
+    {
+      "key": "x",
+      "why": "single character"
+    }
+  ],
+  "reject": [
+    {
+      "key": "",
+      "mode": "refuse",
+      "why": "a key cannot be empty"
+    },
+    {
+      "key": "smith 2024",
+      "mode": "refuse",
+      "why": "whitespace inside a key"
+    },
+    {
+      "key": "has space",
+      "mode": "refuse",
+      "why": "whitespace inside a key"
+    },
+    {
+      "key": "smith\t2024",
+      "mode": "refuse",
+      "why": "tab is whitespace"
+    },
+    {
+      "key": "tab\there",
+      "mode": "refuse",
+      "why": "tab is whitespace"
+    },
+    {
+      "key": "smith\n2024",
+      "mode": "refuse",
+      "why": "newline is whitespace"
+    },
+    {
+      "key": "new\nline",
+      "mode": "refuse",
+      "why": "newline is whitespace"
+    },
+    {
+      "key": "smith\u00002024",
+      "mode": "refuse",
+      "why": "NUL"
+    },
+    {
+      "key": "nul\u0000byte",
+      "mode": "refuse",
+      "why": "NUL"
+    },
+    {
+      "key": "smith\u001b2024",
+      "mode": "refuse",
+      "why": "ESC / C0 control"
+    },
+    {
+      "key": "smith\u007f2024",
+      "mode": "refuse",
+      "why": "DEL"
+    },
+    {
+      "key": "del\u007fchar",
+      "mode": "refuse",
+      "why": "DEL"
+    },
+    {
+      "key": "c1\u009bchar",
+      "mode": "refuse",
+      "why": "C1 control"
+    },
+    {
+      "key": "soft\u00adhyphen",
+      "mode": "refuse",
+      "why": "invisible: soft hyphen"
+    },
+    {
+      "key": "smith\u061c2024",
+      "mode": "refuse",
+      "why": "Arabic letter mark can reorder displayed text"
+    },
+    {
+      "key": "alm\u061cmark",
+      "mode": "refuse",
+      "why": "Arabic letter mark can reorder displayed text"
+    },
+    {
+      "key": "zwsp\u200bspace",
+      "mode": "refuse",
+      "why": "invisible: zero-width space"
+    },
+    {
+      "key": "zwnj\u200cjoiner",
+      "mode": "refuse",
+      "why": "invisible: zero-width non-joiner"
+    },
+    {
+      "key": "zwj\u200djoiner",
+      "mode": "refuse",
+      "why": "invisible: zero-width joiner"
+    },
+    {
+      "key": "smith\u200e2024",
+      "mode": "refuse",
+      "why": "left-to-right mark can disguise key order"
+    },
+    {
+      "key": "lrm\u200emark",
+      "mode": "refuse",
+      "why": "left-to-right mark can disguise key order"
+    },
+    {
+      "key": "smith\u200f2024",
+      "mode": "refuse",
+      "why": "right-to-left mark can disguise key order"
+    },
+    {
+      "key": "rlm\u200fmark",
+      "mode": "refuse",
+      "why": "right-to-left mark can disguise key order"
+    },
+    {
+      "key": "smith\u202e2024",
+      "mode": "refuse",
+      "why": "bidi override: key cannot be displayed honestly"
+    },
+    {
+      "key": "override\u202espoof",
+      "mode": "refuse",
+      "why": "bidi override: key cannot be displayed honestly"
+    },
+    {
+      "key": "lro\u202dspoof",
+      "mode": "refuse",
+      "why": "bidi override: left-to-right override, the other half of the U+202a-U+202e range"
+    },
+    {
+      "key": "smith\u2066rtl\u2069",
+      "mode": "refuse",
+      "why": "bidi isolate"
+    },
+    {
+      "key": "isolate\u2066spoof",
+      "mode": "refuse",
+      "why": "unpaired bidi isolate"
+    },
+    {
+      "key": "wordjoiner\u2060x",
+      "mode": "refuse",
+      "why": "invisible: word joiner"
+    },
+    {
+      "key": "invisibletimes\u2062x",
+      "mode": "refuse",
+      "why": "invisible: an invisible math operator from the U+2060-U+2064 range"
+    },
+    {
+      "key": "bom\ufeffchar",
+      "mode": "refuse",
+      "why": "invisible: byte-order mark"
+    },
+    {
+      "key": "variation\ufe0fselector",
+      "mode": "refuse",
+      "why": "invisible: variation selector"
+    },
+    {
+      "key": "braille\u2800blank",
+      "mode": "refuse",
+      "why": "blank glyph: braille pattern blank draws an empty cell, not whitespace"
+    },
+    {
+      "key": "smith2020\u2800",
+      "mode": "refuse",
+      "why": "blank glyph: a trailing braille blank renders as plain smith2020"
+    },
+    {
+      "key": "cafe\u0301",
+      "mode": "refuse",
+      "why": "not NFC: combining acute on a plain base"
+    },
+    {
+      "key": "constructor",
+      "mode": "refuse",
+      "why": "reserved: names an Object.prototype member"
+    },
+    {
+      "key": "prototype",
+      "mode": "refuse",
+      "why": "reserved: the prototype property"
+    },
+    {
+      "key": "__proto__",
+      "mode": "refuse",
+      "why": "reserved: prototype-pollution vector"
+    },
+    {
+      "key": "toString",
+      "mode": "refuse",
+      "why": "reserved: names an Object.prototype member"
+    },
+    {
+      "key": "valueOf",
+      "mode": "refuse",
+      "why": "reserved: names an Object.prototype member"
+    },
+    {
+      "key": "hasOwnProperty",
+      "mode": "refuse",
+      "why": "reserved: names an Object.prototype member"
+    },
+    {
+      "key": "isPrototypeOf",
+      "mode": "refuse",
+      "why": "reserved: names an Object.prototype member"
+    },
+    {
+      "key": "propertyIsEnumerable",
+      "mode": "refuse",
+      "why": "reserved: names an Object.prototype member"
+    },
+    {
+      "key": "toLocaleString",
+      "mode": "refuse",
+      "why": "reserved: names an Object.prototype member"
+    },
+    {
+      "key": "__defineGetter__",
+      "mode": "refuse",
+      "why": "reserved: names an Object.prototype member"
+    },
+    {
+      "key": "__defineSetter__",
+      "mode": "refuse",
+      "why": "reserved: names an Object.prototype member"
+    },
+    {
+      "key": "__lookupGetter__",
+      "mode": "refuse",
+      "why": "reserved: names an Object.prototype member"
+    },
+    {
+      "key": "__lookupSetter__",
+      "mode": "refuse",
+      "why": "reserved: names an Object.prototype member"
+    },
+    {
+      "key": "smith{2024",
+      "mode": "refuse",
+      "why": "brace opens a group that never closes"
+    },
+    {
+      "key": "has{brace",
+      "mode": "refuse",
+      "why": "brace opens a group that never closes"
+    },
+    {
+      "key": "smith,2024",
+      "mode": "terminate",
+      "reads": "smith",
+      "why": "comma is the field delimiter"
+    },
+    {
+      "key": "has,comma",
+      "mode": "terminate",
+      "reads": "has",
+      "why": "comma is the field delimiter"
+    },
+    {
+      "key": "smith}2024",
+      "mode": "terminate",
+      "reads": "smith",
+      "why": "brace closes the entry"
+    },
+    {
+      "key": "has}brace",
+      "mode": "terminate",
+      "reads": "has",
+      "why": "brace closes the entry"
+    }
+  ]
+}

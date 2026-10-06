@@ -1,0 +1,36 @@
+x-common: &common
+  working_dir: /app
+  volumes:
+    - .:/app
+    - node_modules:/app/node_modules
+
+services:
+  build:
+    <<: *common
+    # Pinned by digest, never by tag: a tag is a name its owner can move.
+    image: node:24-bookworm-slim@sha256:0e0ff40c39bc087845bfb27465a0df4ea419520094bc35842ff83dd8cbe6f9b6
+    # The build refuses without it, and its error says what to set.
+    environment:
+      - VITE_SITE_URL
+    command: sh -c "npm ci && npm run build"
+
+  preview:
+    <<: *common
+    image: node:24-bookworm-slim@sha256:0e0ff40c39bc087845bfb27465a0df4ea419520094bc35842ff83dd8cbe6f9b6
+    ports:
+      # Loopback only. A bare 4173:4173 would put the server on the local network.
+      - "127.0.0.1:4173:4173"
+    command: sh -c "npm ci && npm run preview:docker"
+
+  # deploy.yml runs this same service and publishes the dist/ it leaves behind.
+  verify:
+    <<: *common
+    # Pinned by digest, never by tag: a tag is a name its owner can move.
+    image: node:24-bookworm-slim@sha256:0e0ff40c39bc087845bfb27465a0df4ea419520094bc35842ff83dd8cbe6f9b6
+    # VITE_SITE_URL passed through from the host so a CI run (which sets it from the real Pages URL) builds against the real origin; unset, verify:run's own fallback in package.json still applies.
+    environment:
+      - VITE_SITE_URL
+    command: sh -c "npm ci && npm run verify:run"
+
+volumes:
+  node_modules:

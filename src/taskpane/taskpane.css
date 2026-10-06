@@ -1,0 +1,123 @@
+@import "../theme.css";
+
+/* Snap values to the nearest theme.css token; write a literal only where none fits. */
+
+:root {
+  /* Retint to Word's own blue (4.86:1 light / 6.01:1 dark on canvas, 5.38:1 / 5.71:1 for the mark) — move the pair together. */
+  --theme-accent: light-dark(#0f6cbd, #2899f5);
+  --theme-on-accent: light-dark(#ffffff, #171c1c);
+
+  /* A docked pane is 240–400px wide, so the whole rem scale here runs one step tighter than the shared theme's. */
+  --theme-text-3xl: 1.25rem;
+  --theme-text-2xl: 0.875rem;
+  --theme-text-lg: 0.875rem;
+  --theme-space-lg: 0.75rem;
+}
+
+#app {
+  min-width: 240px;
+  padding: var(--theme-space-md) var(--theme-space-md) var(--theme-space-xl);
+}
+
+/* The theme leaves prose margins on headings/paragraphs; this pane is packed by its .stack/.panel gaps instead. */
+h1,
+h2,
+p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Library text, filenames and parser output are the user's data, so a run of it cannot reorder the sentence around it. */
+#source-status,
+.entry-meta {
+  unicode-bidi: plaintext;
+}
+
+#style-select,
+#citation-form {
+  width: 100%;
+}
+
+/* A text input's intrinsic width would otherwise push the row past a narrow pane. */
+#locator {
+  min-width: 0;
+}
+
+/* Overrides .list.panel's border: this is an interactive control, so it needs the stronger WCAG 1.4.11 border a quiet container doesn't clear. */
+#entry-list {
+  max-height: 300px;
+  margin: 0;
+  list-style: none;
+  border-color: var(--theme-control-border);
+}
+
+#entry-list li + li {
+  border-top: 1px solid var(--theme-border);
+}
+
+#entry-list li.selected {
+  background: var(--theme-wash-strong);
+}
+
+.entry-option {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--theme-space-sm);
+  min-height: 48px;
+  padding: var(--theme-space-sm);
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .entry-option:hover {
+    background: var(--theme-wash);
+  }
+}
+
+/* Inset box-shadow, not outline: #entry-list scrolls, and an outline near the edge would get clipped by the scroll boundary. */
+.entry-option:focus-within {
+  box-shadow: inset var(--theme-focus-ring);
+}
+
+.entry-key {
+  display: block;
+  color: var(--theme-accent);
+  font-weight: var(--theme-weight-semibold);
+  overflow-wrap: anywhere;
+}
+
+.entry-meta {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.list-note {
+  padding: var(--theme-space-sm);
+}
+
+#insert-citation {
+  flex: 1 1 auto;
+}
+
+/* Wraps the whole box, tighter than a section panel: the text after .banner-title is a bare text node no selector can reach. */
+#messages .panel {
+  padding: var(--theme-space-sm);
+  overflow-wrap: anywhere;
+}
+
+/* Smaller than the theme's default --theme-icon-md: this pane's buttons are too compact to fit a 24px spinner without growing. */
+.is-busy .spinner {
+  block-size: var(--theme-icon-sm);
+  inline-size: var(--theme-icon-sm);
+}
+
+/* The theme's ring/arc colours are unreadable on .primary's accent fill, so on-accent stands in for both (0.5 matches --theme-control-border's own alpha for this role). */
+.primary.is-busy .spinner {
+  border-color: rgb(from var(--theme-on-accent) r g b / 0.5);
+  border-top-color: var(--theme-on-accent);
+}
+
+/* The quietest line in the footer: the muted tone a step lighter, 4.6:1 on --theme-canvas in light mode, still above WCAG's 4.5:1. Scaling muted's own alpha keeps its stronger prefers-contrast override. */
+#version {
+  color: rgb(from var(--theme-ink-muted) r g b / calc(alpha * 0.85));
+}

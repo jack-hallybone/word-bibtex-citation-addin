@@ -1,0 +1,10 @@
+{
+  // Separate from tsconfig.json: the suite runs on Node and may use APIs the browser target forbids.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "types": ["office-js", "node"]
+  },
+  "include": ["src/**/*", "tests/**/*", "vite.config.ts"]
+}

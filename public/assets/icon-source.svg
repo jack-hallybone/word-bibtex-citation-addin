@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" role="img" aria-label="BibCite">
+  <rect width="80" height="80" rx="16" fill="#0f6cbd" />
+  <!-- Lucide "book-marked" from lucide-static 1.41.0 (ISC, Lucide Icons and Contributors): the two path data strings below are byte-identical to that release's icons/book-marked.svg, and the version is named so "unmodified" is a claim anyone can check. -->
+  <g
+    transform="translate(16 16) scale(2)"
+    fill="none"
+    stroke="#ffffff"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
+    <path d="M10 2v8l3-3 3 3V2" />
+    <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20" />
+  </g>
+</svg>

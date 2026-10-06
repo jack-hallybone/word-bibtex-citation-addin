@@ -1,0 +1,8 @@
+# One rule: every text file is LF in the repository and in the working tree.
+* text=auto eol=lf
+
+*.png binary
+
+# NOT text: the CSL styles are SHA-256 pinned elsewhere, and a normalised line ending would break the pin.
+public/assets/csl/** -text
+public/licenses/** -text

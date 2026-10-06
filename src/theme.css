@@ -1,0 +1,1160 @@
+/* Copied in, not installed: never edit it in a consuming project, suggest changes only. */
+
+/* Provides consistent design language and boilerplate to multiple projects. */
+
+/* Retint by redeclaring a --theme-* value in a stylesheet that loads after this one. */
+
+/* Sync split (2026-09-25, self-documenting-project-manager added
+   2026-09-25 morning): pdf-annotator, reference-manager,
+   literature-pdf-bibtex-downloader, word-bibtex-citation-addin and
+   self-documenting-project-manager keep this file genuinely synced —
+   their src/theme.css must stay byte-identical to
+   normalization-survey/canonical-theme.css. There is no sync script: pull
+   a canonical change by copying that file over this one, whole. Every
+   other consuming project split off on this date and now owns its copy
+   independently — a canonical change no longer reaches them, and nothing
+   here should try to force one back into sync. */
+
+/* A token or class earns its place by demonstrated real use — here or in a consuming project — and loses it the same way. */
+
+/* A name implying siblings — an ordinal step like a size or z-tier, or a paired opposite like a direction — earns the whole set once one member is real. */
+
+/* Every selector here is global, so a scoped-styles project (Svelte, CSS Modules) reusing a class name like .dialog or .backdrop still gets this rule too. */
+
+/* ---- Tokens ---- */
+
+:root {
+  /* A retint reaches CSS only — theme-color meta, manifest colours and baked-in icons need their own updates per scheme. */
+  color-scheme: light dark;
+  /* getPropertyValue() on a --theme-* token returns unresolved text like light-dark(#fff, #000); read getComputedStyle(el).color on an element using the token instead. */
+
+  /* Chroma 0: all the colour is in the ink and the four roles below. */
+  --theme-canvas: light-dark(#f5f3f0, #161614);
+  --theme-surface: light-dark(#ffffff, #211f1d);
+  /* Not black: a warm, near-neutral cast at chroma 0.006-0.007. */
+  --theme-ink: light-dark(#1c1917, #e9e7e2);
+
+  /* One accent, for text and for fills alike; ink itself until a project retints it. */
+  --theme-accent: var(--theme-ink);
+  --theme-on-accent: light-dark(#ffffff, #161614);
+
+  /* A status must never be carried by its colour alone: add an icon or a word. */
+  --theme-success: light-dark(#1c7851, #10a66e);
+  --theme-warning: light-dark(#8e6112, #c88700);
+  --theme-danger: light-dark(#b8413f, #e17069);
+
+  --theme-ink-muted: rgb(from var(--theme-ink) r g b / 0.72);
+  --theme-border: rgb(from var(--theme-ink) r g b / 0.12);
+  /* Lightest alpha clearing 3:1 in both schemes (worst case 3.21:1). */
+  --theme-control-border: rgb(from var(--theme-ink) r g b / 0.5);
+  --theme-wash: rgb(from var(--theme-ink) r g b / 0.06);
+  --theme-wash-strong: rgb(from var(--theme-ink) r g b / 0.12);
+
+  --theme-shadow: light-dark(#1c1917, #000000);
+  /* In dark mode this is only a secondary lift cue — a shadow against near-black canvas has little headroom (see --theme-surface-raised below). */
+  /* light-dark() returns a <color>, so it must wrap only the alpha's colour: wrapping the whole shadow is invalid and drops it to `none`. */
+  --theme-shadow-raised: 0 8px 22px
+    light-dark(
+      rgb(from var(--theme-shadow) r g b / 0.05),
+      rgb(from var(--theme-shadow) r g b / 0.35)
+    );
+  /* One elevation for everything that floats: dialogs, menus, popovers, toasts. */
+  --theme-shadow-floating: 0 12px 30px
+    light-dark(
+      rgb(from var(--theme-shadow) r g b / 0.18),
+      rgb(from var(--theme-shadow) r g b / 0.5)
+    );
+  /* A box-shadow alternative to :focus-visible's outline for when outline is clipped or an inset ring is needed — write `inset var(--theme-focus-ring)`, no separate token. */
+  --theme-focus-ring: 0 0 0 2px var(--theme-accent);
+  /* :focus-visible's own outline value, so a project's own :focus-within rule can match it instead of hardcoding it. */
+  --theme-focus-outline: 2px solid var(--theme-accent);
+
+  /* Dark mode's primary elevation cue; in light mode it equals --theme-surface since white has nowhere left to lighten, so light mode relies on the shadow instead. */
+  --theme-surface-raised: light-dark(
+    var(--theme-surface),
+    oklch(from var(--theme-surface) calc(l + 0.035) c h)
+  );
+  --theme-surface-floating: light-dark(
+    var(--theme-surface),
+    oklch(from var(--theme-surface) calc(l + 0.07) c h)
+  );
+
+  /* menu outranks dialog-backdrop since a backdrop may scope to just one region, not the whole page; modal is its own tier since a dialog body may be portalled to end of body. */
+  --theme-z-nav: 10;
+  --theme-z-panel: 20;
+  --theme-z-floating: 30;
+  --theme-z-dropdown: 40;
+  --theme-z-notice: 50;
+  --theme-z-dialog-backdrop: 60;
+  --theme-z-menu: 70;
+  --theme-z-modal: 80;
+  --theme-z-top: 90;
+
+  --theme-sans:
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --theme-serif: ui-serif, Georgia, "Times New Roman", serif;
+  --theme-mono: ui-monospace, monospace;
+
+  /* Roles, not stacks: a project can swap body/heading fonts here without redeclaring the whole stack. */
+  --theme-font-body: var(--theme-sans);
+  --theme-font-headers: var(--theme-sans);
+
+  --theme-radius-sm: 4px;
+  --theme-radius-md: 6px;
+  --theme-radius-lg: 8px;
+  --theme-radius-pill: 999px;
+
+  /* rem so the rhythm grows with the reader's text size; controls pad in em. */
+  --theme-space-2xs: 0.125rem;
+  --theme-space-xs: 0.25rem;
+  --theme-space-sm: 0.5rem;
+  --theme-space-md: 0.75rem;
+  --theme-space-lg: 1rem;
+  --theme-space-xl: 1.5rem;
+
+  /* xs is 24px, WCAG 2.2's minimum target size. */
+  --theme-control-xs: 1.5rem;
+  --theme-control-sm: 1.75rem;
+  --theme-control-md: 2rem;
+  --theme-control-lg: 2.5rem;
+
+  /* Each icon step is its --theme-control-* size minus 2× --theme-space-xs, so it sits right inside the same-size button.icon-button. */
+  --theme-icon-xs: 1rem;
+  --theme-icon-sm: 1.25rem;
+  --theme-icon-md: 1.5rem;
+  --theme-icon-lg: 2rem;
+
+  --theme-text-xs: 0.75rem;
+  --theme-text-sm: 0.8125rem;
+  --theme-text-md: 0.875rem;
+  --theme-text-lg: 0.9375rem;
+  /* xl and up are heading sizes, not control sizes. */
+  --theme-text-xl: 1.25rem;
+  --theme-text-2xl: 1.5rem;
+  --theme-text-3xl: 2rem;
+
+  --theme-weight-medium: 500;
+  --theme-weight-semibold: 600;
+  --theme-weight-bold: 700;
+
+  --theme-duration-fast: 120ms;
+  --theme-ease: ease;
+
+  --theme-measure: 60rem;
+}
+
+/* ---- Contrast ---- */
+
+/* `:root:root` is load-bearing: without the extra specificity, a project's retint (loaded after this file) would win at equal specificity. */
+@media (prefers-contrast: more) {
+  :root:root {
+    --theme-canvas: light-dark(#ffffff, #000000);
+    --theme-surface: light-dark(#ffffff, #000000);
+    --theme-ink: light-dark(#000000, #ffffff);
+
+    /* No --theme-accent override needed: it still reads --theme-ink. */
+    --theme-success: light-dark(#3d614d, #00ae72);
+    --theme-warning: light-dark(#6b5638, #d79200);
+    --theme-danger: light-dark(#754f4c, #e9716a);
+
+    --theme-ink-muted: rgb(from var(--theme-ink) r g b / 0.9);
+    --theme-border: rgb(from var(--theme-ink) r g b / 0.4);
+    --theme-control-border: var(--theme-ink);
+    --theme-wash: rgb(from var(--theme-ink) r g b / 0.12);
+    --theme-wash-strong: rgb(from var(--theme-ink) r g b / 0.24);
+  }
+}
+
+/* ---- Elements ---- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Cascade origin outranks specificity, so any author `display` rule would beat plain UA [hidden] — only !important wins it back. */
+[hidden] {
+  display: none !important;
+}
+
+body {
+  margin: 0;
+  background: var(--theme-canvas);
+  color: var(--theme-ink);
+  font-family: var(--theme-font-body);
+  /* Not left to the UA default it matches: a retinted scale must reach body text. */
+  font-size: var(--theme-text-lg);
+  /* Normalises x-height so mixing or retinting sans/serif/mono never leaves one looking smaller at the same font-size. */
+  font-size-adjust: from-font;
+  line-height: 1.45;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--theme-font-headers);
+  font-weight: var(--theme-weight-bold);
+  line-height: 1.2;
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: var(--theme-text-3xl);
+}
+h2 {
+  font-size: var(--theme-text-2xl);
+}
+h3 {
+  font-size: var(--theme-text-xl);
+}
+h4 {
+  font-size: var(--theme-text-lg);
+}
+h5 {
+  font-size: var(--theme-text-md);
+}
+h6 {
+  font-size: var(--theme-text-sm);
+}
+
+/* Only <img>/<video>: height: auto on <svg> or <canvas> collapses every sized icon. */
+img,
+video {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Underlined always so colour isn't the only cue (WCAG 1.4.1); the radius is for the focus ring's corners. */
+a {
+  border-radius: var(--theme-radius-sm);
+  color: var(--theme-accent);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+@media (hover: hover) {
+  a:hover {
+    text-decoration-thickness: 1.5px;
+  }
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--theme-border);
+  margin: var(--theme-space-lg) 0;
+}
+
+blockquote {
+  margin-inline: 0;
+  padding-inline-start: var(--theme-space-lg);
+  border-inline-start: 2px solid var(--theme-border);
+  color: var(--theme-ink-muted);
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th,
+td {
+  text-align: left;
+  padding: var(--theme-space-xs) var(--theme-space-lg) var(--theme-space-xs) 0;
+  border-bottom: 1px solid var(--theme-border);
+}
+
+th {
+  font-weight: var(--theme-weight-semibold);
+  color: var(--theme-ink-muted);
+}
+
+caption {
+  text-align: left;
+  color: var(--theme-ink-muted);
+  padding-bottom: var(--theme-space-xs);
+}
+
+code,
+kbd,
+pre,
+samp {
+  font-family: var(--theme-mono);
+}
+
+pre {
+  overflow-x: auto;
+}
+
+kbd {
+  border: 1px solid var(--theme-control-border);
+  border-radius: var(--theme-radius-sm);
+  padding: 0 var(--theme-space-xs);
+  background: var(--theme-wash);
+}
+
+/* Both tints ride the accent; the UA paints <mark> a hardcoded #ffff00 in both schemes. */
+mark,
+::selection {
+  background: rgb(from var(--theme-accent) r g b / 0.24);
+}
+mark {
+  color: inherit;
+}
+
+/* ---- Controls ---- */
+
+/* line-height: normal, not the inherited 1.5, or an input would run taller than the select beside it despite identical padding. */
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+  line-height: normal;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+}
+
+/* inline-flex so an icon and label inside one button lay out as a row for free; a no-op for a text-only button. */
+button {
+  align-items: center;
+  background: var(--theme-surface);
+  border: 1px solid var(--theme-control-border);
+  border-radius: var(--theme-radius-lg);
+  display: inline-flex;
+  gap: var(--theme-space-xs);
+  justify-content: center;
+  padding: 0.5em 1em;
+  cursor: pointer;
+
+  &.primary {
+    background: var(--theme-accent);
+    color: var(--theme-on-accent);
+    border-color: transparent;
+  }
+
+  /* A destructive action must not look affirmative, so solid and outline stay separate classes (as button.icon-button/.icon-center do) since a project may need both at once. */
+  &.danger {
+    background: var(--theme-danger);
+    color: var(--theme-on-accent);
+    border-color: transparent;
+  }
+
+  /* No hover rule: the veil below paints over this and keeps the hue. */
+  &.danger-outline {
+    border-color: var(--theme-danger);
+    color: var(--theme-danger);
+  }
+
+  &.ghost {
+    background: none;
+    border-color: transparent;
+  }
+
+  /* Reads as underlined link text, for an inline action that must be a <button>, not an <a>. */
+  &.link {
+    background: none;
+    border-color: transparent;
+    color: var(--theme-accent);
+    padding: 0;
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+  }
+
+  /* A fixed square off the control scale, since a bare icon has no label to grow the target with. */
+  &.icon-button {
+    border-radius: var(--theme-radius-md);
+    display: grid;
+    height: var(--theme-control-md);
+    padding: 0;
+    place-items: center;
+    width: var(--theme-control-md);
+
+    &.xs {
+      height: var(--theme-control-xs);
+      width: var(--theme-control-xs);
+    }
+    &.sm {
+      height: var(--theme-control-sm);
+      width: var(--theme-control-sm);
+    }
+    &.lg {
+      height: var(--theme-control-lg);
+      width: var(--theme-control-lg);
+    }
+
+    /* A toolbar icon reads quieter until reached for, since button.ghost already mutes border and fill. */
+    &.ghost {
+      color: var(--theme-ink-muted);
+    }
+
+    /* For a bare icon whose rest state itself carries meaning (armed, soloed), not a momentary action — declared after .ghost so it wins when combined. */
+    &.tone-success {
+      color: var(--theme-success);
+    }
+    &.tone-warning {
+      color: var(--theme-warning);
+    }
+    &.tone-danger {
+      color: var(--theme-danger);
+    }
+  }
+
+  /* Same em-padding shrink as .dialog-actions button, as a reusable class for any other dense row. */
+  &.compact {
+    font-size: var(--theme-text-sm);
+  }
+
+  &.selected {
+    background: var(--theme-wash-strong);
+    border-color: transparent;
+    box-shadow: inset 0 0 0 1px var(--theme-ink);
+  }
+}
+
+/* Sizes a bare <svg>/<img> icon off the icon scale; flex-shrink keeps it from collapsing beside text in a .row. */
+.icon {
+  block-size: var(--theme-icon-md);
+  flex-shrink: 0;
+  inline-size: var(--theme-icon-md);
+
+  &.xs {
+    block-size: var(--theme-icon-xs);
+    inline-size: var(--theme-icon-xs);
+  }
+  &.sm {
+    block-size: var(--theme-icon-sm);
+    inline-size: var(--theme-icon-sm);
+  }
+  &.lg {
+    block-size: var(--theme-icon-lg);
+    inline-size: var(--theme-icon-lg);
+  }
+}
+
+/* Centres content in a box the caller sizes (e.g. via --theme-control-*), unlike button.icon-button's fixed size. */
+.icon-center {
+  display: grid;
+  padding: 0;
+  place-items: center;
+}
+
+/* A separate class, not folded into button's own selector list — that would raise button.primary/.ghost's specificity everywhere and could silently break a project's override. */
+.button-look {
+  align-items: center;
+  background: var(--theme-surface);
+  border: 1px solid var(--theme-control-border);
+  border-radius: var(--theme-radius-lg);
+  color: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  gap: var(--theme-space-xs);
+  justify-content: center;
+  padding: 0.5em 1em;
+  text-decoration: none;
+}
+
+/* Behind `hover: hover` since a touch device leaves the last-tapped element stuck hovered until something else is tapped; the veil is a gradient over whatever fill a variant set, so it keeps the hue. */
+@media (hover: hover) {
+  button:hover:not(:disabled),
+  .button-look:hover {
+    background-image: linear-gradient(
+      var(--theme-wash-strong),
+      var(--theme-wash-strong)
+    );
+  }
+
+  /* :where() ties this to .ghost's own specificity, so a project override that already beats .ghost also wins here (its stylesheet loads after this one). */
+  button.icon-button:where(.ghost):hover:not(:disabled) {
+    color: var(--theme-ink);
+  }
+
+  /* The veil above would paint a rectangle behind link-style text. */
+  button.link:hover:not(:disabled) {
+    background-image: none;
+    text-decoration-thickness: 1.5px;
+  }
+}
+
+/* The :not() keeps iOS drawing these three natively, and :where() holds this at element specificity so a project's own class still wins. */
+/* select's arrow stays native since its ::after won't render (checked) and appearance: none can't redraw it — native's uneven cross-browser padding is accepted instead of a wrapper element. */
+input:where(:not([type="checkbox"], [type="radio"], [type="range"])),
+select,
+textarea {
+  background: var(--theme-surface);
+  border: 1px solid var(--theme-control-border);
+  border-radius: var(--theme-radius-lg);
+  padding: 0.4em 0.6em;
+}
+
+/* Grows with input instead of capping and scrolling (resize off since the box sizes itself); no @supports guard, same bar as this file's other modern-only CSS (light-dark(), :has(), relative colour syntax). */
+textarea.textarea-auto {
+  field-sizing: content;
+  max-block-size: 16rem;
+  resize: none;
+}
+
+input:is([type="checkbox"], [type="radio"], [type="range"]) {
+  accent-color: var(--theme-accent);
+}
+
+input[type="file"]::file-selector-button {
+  font: inherit;
+  color: inherit;
+  background: var(--theme-surface);
+  border: 1px solid var(--theme-control-border);
+  border-radius: var(--theme-radius-sm);
+  padding: 0.2em 0.7em;
+  margin-inline-end: var(--theme-space-sm);
+  cursor: pointer;
+}
+
+/* :user-invalid, not :invalid, which would paint a fresh, untouched required field red on load; aria-invalid covers a project's own validation. */
+:is(input, select, textarea):is(:user-invalid, [aria-invalid="true"]) {
+  border-color: var(--theme-danger);
+}
+
+:focus-visible {
+  outline: var(--theme-focus-outline);
+  outline-offset: 2px;
+}
+
+/* ---- Nav, footer, dialogs & menus ---- */
+
+/* A page header, not positioned — add sticky/fixed to keep it in view, and .z-nav to stack it once it is. */
+.nav {
+  align-items: center;
+  background: var(--theme-surface);
+  border-block-end: 1px solid var(--theme-border);
+  display: flex;
+  gap: var(--theme-space-lg);
+  padding: var(--theme-space-sm) var(--theme-space-lg);
+}
+
+/* .credit removed — compose the footer from primitives instead, adding .text-muted to the link since <a> doesn't inherit muted colour; see demo.html. */
+
+/* An anchored, non-modal menu/popover a native <dialog> can't provide; the caller positions it. */
+.menu {
+  box-sizing: border-box;
+  display: grid;
+  font-size: var(--theme-text-sm);
+  font-weight: var(--theme-weight-medium);
+  gap: var(--theme-space-2xs);
+}
+
+/* A compound selector, not a bare `.menu` padding — at equal specificity with .panel's own, whichever is declared last would silently win instead. */
+.menu.panel {
+  padding: var(--theme-space-xs);
+}
+
+.menu-item,
+.menu > button {
+  align-items: center;
+  background: none;
+  border: 0;
+  border-radius: var(--theme-radius-sm);
+  color: var(--theme-ink);
+  display: flex;
+  gap: var(--theme-space-sm);
+  /* Over the base button's centred content: a menu item reads left to right. */
+  justify-content: flex-start;
+  padding: var(--theme-space-xs) var(--theme-space-sm);
+  /* Named here, not left to .motion-fast's "all": the component knows what changes on hover, the utility only knows how fast. */
+  transition-property: background-color;
+  white-space: nowrap;
+}
+
+.menu-separator {
+  background: var(--theme-border);
+  block-size: 1px;
+  margin: var(--theme-space-2xs) calc(var(--theme-space-xs) * -1);
+}
+
+.menu > button:hover:not(:disabled),
+.menu > button:focus-visible {
+  background: var(--theme-wash);
+  background-image: none;
+}
+
+/* A bordered, scrolling collection of selectable rows; pairs with .panel for its shape (class="list panel", the same split .menu.panel makes) and adds only scroll behaviour, not a height. */
+.list {
+  overflow-y: auto;
+}
+
+/* Flush, not .panel's space-lg: rows self-pad and their own separator/hover/selected states need to reach the container's edges. */
+.list.panel {
+  padding: 0;
+}
+
+.list-item {
+  align-items: center;
+  border-block-end: 1px solid var(--theme-border);
+  cursor: pointer;
+  display: flex;
+  gap: var(--theme-space-sm);
+  padding: var(--theme-space-xs) var(--theme-space-sm);
+  transition-property: background-color;
+
+  &:last-child {
+    border-block-end: 0;
+  }
+}
+
+.list-item:hover {
+  background: var(--theme-wash);
+}
+
+/* .list clips outline at its own scroll boundary, so a near-edge row could lose its ring — inset keeps the ring inside the row itself instead. */
+.list-item:focus-visible {
+  box-shadow: inset var(--theme-focus-ring);
+  outline: none;
+}
+
+/* Declared after :hover so a selected row keeps the stronger wash even while also hovered. */
+.list-item[aria-selected="true"] {
+  background: var(--theme-wash-strong);
+}
+
+dialog {
+  background: var(--theme-surface);
+  color: var(--theme-ink);
+  border: 1px solid var(--theme-border);
+  border-radius: var(--theme-radius-lg);
+  /* Clamped against 92vw too since a bare 28rem overflows a narrow phone; a dialog needing more room opts out with max-width: none. */
+  max-width: min(28rem, 92vw);
+  /* The UA's 1em is off the spacing scale; a dialog whose own parts pad themselves sets `padding: 0` once. */
+  padding: var(--theme-space-lg);
+  box-shadow: var(--theme-shadow-floating);
+}
+
+/* A page-authored class that sets `display` (e.g. .dialog, .stack) beats the UA's native `dialog:not([open]){display:none}` by cascade origin alone, regardless of specificity — without this, a closed dialog would stay visible and clickable. */
+dialog:not([open]) {
+  display: none;
+}
+
+/* One scrim for a native <dialog> and for a JS-managed role="dialog" one. */
+dialog::backdrop,
+.backdrop {
+  backdrop-filter: blur(2px);
+  background: rgb(from var(--theme-canvas) r g b / 0.76);
+}
+
+/* Centres a JS-managed dialog over what it dims. */
+.backdrop {
+  box-sizing: border-box;
+  display: grid;
+  inset: 0;
+  padding: var(--theme-space-lg);
+  place-items: center;
+  /* absolute, not fixed, so a project can scope it to one region; a full-page backdrop needs its own positioned ancestor and a scroll lock. */
+  position: absolute;
+}
+
+/* Layout only for a role="dialog" element; pair with .panel/.panel.floating for shape. */
+.dialog {
+  box-sizing: border-box;
+  display: grid;
+  gap: var(--theme-space-md);
+  max-width: 100%;
+}
+
+/* Same value as .panel's own today; a compound selector so a future change to either value can't silently reintroduce the collision .menu.panel documents above. */
+.dialog.panel {
+  padding: var(--theme-space-lg);
+}
+
+.dialog-title {
+  font-size: var(--theme-text-lg);
+  font-weight: var(--theme-weight-bold);
+  margin: 0;
+}
+
+.dialog-body {
+  color: var(--theme-ink-muted);
+  font-size: var(--theme-text-md);
+  line-height: 1.45;
+  margin: 0;
+}
+
+.dialog-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--theme-space-sm);
+  justify-content: flex-end;
+
+  /* The base button padding is in em, so this alone scales it down. */
+  & button {
+    font-size: var(--theme-text-sm);
+    font-weight: var(--theme-weight-semibold);
+  }
+}
+
+/* ---- Forms ---- */
+
+/* Reads as one text field: an input beside a fixed prefix or suffix. */
+.input-shell {
+  align-items: center;
+  background: var(--theme-surface);
+  border: 1px solid var(--theme-control-border);
+  border-radius: var(--theme-radius-sm);
+  display: flex;
+  padding-inline-start: var(--theme-space-sm);
+
+  /* :focus-within can't reach for :focus-visible's outline directly, so it matches the token instead of hardcoding the same value. */
+  &:focus-within {
+    outline: var(--theme-focus-outline);
+    outline-offset: 2px;
+  }
+
+  /* Its own border, background and :focus-visible outline would each double up on the shell's own. */
+  & input {
+    background: none;
+    border: 0;
+    border-radius: 0;
+
+    &:focus-visible {
+      outline: none;
+    }
+  }
+}
+
+.field {
+  display: grid;
+  gap: var(--theme-space-xs);
+}
+
+.field-label {
+  font-size: var(--theme-text-sm);
+  font-weight: var(--theme-weight-medium);
+}
+
+/* Or the label beside a dimmed checkbox stays at full strength. */
+.field:has(:disabled) .field-label {
+  opacity: 0.5;
+}
+
+/* ---- Utilities ---- */
+
+/* A class, not `main {}`: clamping every <main> made the override the norm. */
+.measure {
+  max-width: var(--theme-measure);
+  margin-inline: auto;
+  padding: var(--theme-space-xl) var(--theme-space-lg);
+}
+
+/* Aligns full-bleed content to .measure's centred column, winning .nav's own padding-inline by source order since it's declared later in this file. */
+.bleed {
+  padding-inline: max(
+    var(--theme-space-lg),
+    calc((100% - var(--theme-measure)) / 2 + var(--theme-space-lg))
+  );
+}
+
+/* .prose reuses this for its own unclassed <pre>, since rendered markdown/CMS HTML has no way to add a class to it. */
+.code-block,
+.prose pre {
+  background: var(--theme-wash);
+  border-radius: var(--theme-radius-md);
+  padding: var(--theme-space-sm) var(--theme-space-md);
+}
+
+/* For rendered markdown/CMS HTML — headings/blockquote/table/code are already styled unscoped above, so this only adds block rhythm, list markers and .code-block's box on <pre>. */
+.prose {
+  & :is(h1, h2, h3, h4, h5, h6, p, ul, ol, blockquote, pre, table, hr) {
+    margin-block: 0;
+  }
+  /* Same element list as the reset above, not a bare `* + *`, whose (0,1,0) always lost to the reset's (0,1,1) regardless of source order. */
+  & > * + :is(h1, h2, h3, h4, h5, h6, p, ul, ol, blockquote, pre, table, hr) {
+    margin-block-start: var(--theme-space-lg);
+  }
+  & :is(ul, ol) {
+    padding-inline-start: var(--theme-space-xl);
+  }
+  & li + li {
+    margin-block-start: var(--theme-space-xs);
+  }
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--theme-space-sm);
+  align-items: center;
+
+  /* A flex item's own margin doesn't collapse into the gap, so a <p> child would stack its margin on top of it. */
+  & > p {
+    margin: 0;
+  }
+
+  /* For a row that must stay one line even when narrow, e.g. checkbox, label and delete button. */
+  &.nowrap {
+    flex-wrap: nowrap;
+  }
+
+  /* .row centres its cross axis by default; add one of these to align items to an edge instead. */
+  &.start {
+    align-items: flex-start;
+  }
+  &.end {
+    align-items: flex-end;
+  }
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--theme-space-sm);
+
+  /* A flex item's own margin doesn't collapse into the gap, so a <p> child would stack its margin on top of it. */
+  & > p {
+    margin: 0;
+  }
+
+  /* Only <ul>/<ol>: a stacked <div> has no marker or padding to strip. */
+  &:is(ul, ol) {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+}
+
+/* Confirmed by two consuming projects independently rebuilding this for a settings or field grid. */
+.tile-grid {
+  display: grid;
+  gap: var(--theme-space-sm);
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(var(--theme-tile-min, 13rem), 1fr)
+  );
+}
+
+/* Spelled .xxs, not .2xs, since a class selector's leading digit would need escaping. */
+:is(.row, .stack, .tile-grid).xxs {
+  gap: var(--theme-space-2xs);
+}
+:is(.row, .stack, .tile-grid).xs {
+  gap: var(--theme-space-xs);
+}
+:is(.row, .stack, .tile-grid).md {
+  gap: var(--theme-space-md);
+}
+:is(.row, .stack, .tile-grid).lg {
+  gap: var(--theme-space-lg);
+}
+:is(.row, .stack, .tile-grid).xl {
+  gap: var(--theme-space-xl);
+}
+
+/* Grows to fill leftover space in a flex row or stack, e.g. a title crowding out trailing actions. */
+.grow {
+  flex: 1;
+}
+
+/* Opt-in: nothing transitions by default, so add this where a state change should ease rather than jump. */
+.motion-fast {
+  transition-duration: var(--theme-duration-fast);
+  transition-timing-function: var(--theme-ease);
+}
+
+/* Add alongside a project's own class rather than editing it: nothing else targets these, so z-index can't tie on source order. */
+.z-nav {
+  z-index: var(--theme-z-nav);
+}
+.z-panel {
+  z-index: var(--theme-z-panel);
+}
+.z-floating {
+  z-index: var(--theme-z-floating);
+}
+.z-dropdown {
+  z-index: var(--theme-z-dropdown);
+}
+.z-notice {
+  z-index: var(--theme-z-notice);
+}
+.z-dialog-backdrop {
+  z-index: var(--theme-z-dialog-backdrop);
+}
+.z-menu {
+  z-index: var(--theme-z-menu);
+}
+.z-modal {
+  z-index: var(--theme-z-modal);
+}
+.z-top {
+  z-index: var(--theme-z-top);
+}
+
+/* Placement only — compose with .panel (or .panel.banner for a toned message) for shape, as a consuming project already does. */
+.toast {
+  inset-block-end: var(--theme-space-xl);
+  inset-inline-start: 50%;
+  max-inline-size: calc(100vw - 2 * var(--theme-space-lg));
+  position: fixed;
+  transform: translateX(-50%);
+  width: max-content;
+  z-index: var(--theme-z-notice);
+}
+
+/* A different family, not a bare .toast variant: it hugs its content in its own container so a non-empty one reserves layout space and an empty one collapses, leaving placement to the consuming layout. */
+.toast.inline {
+  inset-block-end: auto;
+  inset-inline-start: auto;
+  margin-inline: auto;
+  max-inline-size: 100%;
+  position: static;
+  transform: none;
+  width: max-content;
+  z-index: auto;
+}
+
+/* WCAG 2.5.8's 24px minimum on both axes, for a control too small on its own content, e.g. a bare icon in flow. */
+.tap-target {
+  align-items: center;
+  display: inline-flex;
+  min-block-size: var(--theme-control-xs);
+  min-inline-size: var(--theme-control-xs);
+  padding-inline: var(--theme-space-xs);
+}
+
+.text-muted {
+  color: var(--theme-ink-muted);
+}
+
+/* Plain-text counterpart to .text-muted, confirmed by three consuming projects independently rebuilding this trio. */
+.text-success {
+  color: var(--theme-success);
+}
+.text-warning {
+  color: var(--theme-warning);
+}
+.text-danger {
+  color: var(--theme-danger);
+}
+
+/* Maps directly to the --theme-text-* scale, for text that needs a scale size without composing a heading. */
+.text-xs {
+  font-size: var(--theme-text-xs);
+}
+.text-sm {
+  font-size: var(--theme-text-sm);
+}
+.text-md {
+  font-size: var(--theme-text-md);
+}
+.text-lg {
+  font-size: var(--theme-text-lg);
+}
+.text-xl {
+  font-size: var(--theme-text-xl);
+}
+.text-2xl {
+  font-size: var(--theme-text-2xl);
+}
+.text-3xl {
+  font-size: var(--theme-text-3xl);
+}
+
+/* Compose with .text-xs/.text-muted for size/colour; confirmed by three consuming projects hand-rolling this with five different letter-spacing values. */
+.text-label {
+  font-weight: var(--theme-weight-semibold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* code/kbd/pre/samp already get mono unscoped above; this covers any other element that needs a font override. */
+.text-sans {
+  font-family: var(--theme-sans);
+}
+.text-serif {
+  font-family: var(--theme-serif);
+}
+.text-mono {
+  font-family: var(--theme-mono);
+}
+
+/* Block stays physical since nothing here targets vertical writing-modes, but the inline pair stays logical to hold up under RTL, matching blockquote's border-inline-start above. */
+.border-top {
+  border-top: 1px solid var(--theme-border);
+}
+.border-bottom {
+  border-bottom: 1px solid var(--theme-border);
+}
+.border-inline-start {
+  border-inline-start: 1px solid var(--theme-border);
+}
+.border-inline-end {
+  border-inline-end: 1px solid var(--theme-border);
+}
+
+/* min-width: 0 is the caller's job: only a flex or grid item needs it, and the class can't know its parent. */
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Clipped, not `display: none`, which hides it from assistive technology too. */
+.sr-only {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ---- Components ---- */
+
+/* This padding is for a bare .panel only; a class composing .panel (.menu, .dialog, .banner, .list) must override it via a compound selector like .menu.panel, or source order alone decides the winner. */
+.panel {
+  background: var(--theme-surface);
+  border: 1px solid var(--theme-border);
+  border-radius: var(--theme-radius-lg);
+  color: var(--theme-ink);
+  padding: var(--theme-space-lg);
+}
+
+.panel.raised {
+  background: var(--theme-surface-raised);
+  box-shadow: var(--theme-shadow-raised);
+}
+
+/* Shape only — pair with a .z-* utility for stacking; baking z-index into a shared shape class would tie in specificity with whatever else styles the element. */
+.panel.floating {
+  background: var(--theme-surface-floating);
+  box-shadow: var(--theme-shadow-floating);
+}
+
+/* Two selectors, not `> :is(strong, .banner-title)`, since that would lift strong's specificity from (0,2,1) to (0,3,0). */
+.panel.success {
+  border-color: var(--theme-success);
+  & > strong,
+  & > .banner-title {
+    color: var(--theme-success);
+  }
+}
+.panel.warning {
+  border-color: var(--theme-warning);
+  & > strong,
+  & > .banner-title {
+    color: var(--theme-warning);
+  }
+}
+.panel.danger {
+  border-color: var(--theme-danger);
+  & > strong,
+  & > .banner-title {
+    color: var(--theme-danger);
+  }
+}
+
+/* A notification with an action slot; layout only — .panel gives shape and tone (class="panel banner warning"). */
+.banner {
+  align-items: center;
+  display: grid;
+  gap: var(--theme-space-2xs) var(--theme-space-md);
+  grid-template-columns: 1fr auto;
+}
+
+/* Only wins today because .banner is declared after .panel — the same collision .menu.panel documents above, not a guarantee. */
+.banner.panel {
+  padding: var(--theme-space-md) var(--theme-space-lg);
+}
+
+/* A toned banner is a state to notice, so its border outweighs .panel's 1px. */
+.banner:is(.success, .warning, .danger) {
+  border-width: 2px;
+}
+
+.banner-actions {
+  align-items: center;
+  display: flex;
+  gap: var(--theme-space-sm);
+  grid-column: 2;
+  grid-row: 1 / -1;
+}
+
+.banner-title {
+  grid-column: 1;
+  font-size: var(--theme-text-sm);
+  font-weight: var(--theme-weight-semibold);
+  margin: 0;
+}
+
+/* A short status word, never the only carrier of one — see --theme-success. */
+.badge {
+  align-items: center;
+  background: var(--theme-wash-strong);
+  border-radius: var(--theme-radius-pill);
+  color: var(--theme-ink-muted);
+  display: inline-flex;
+  font-size: var(--theme-text-xs);
+  font-weight: var(--theme-weight-semibold);
+  padding: 0.15em 0.7em;
+}
+
+/* A solid fill, not a tint: a tint light enough to read as tinted can't also hold 4.5:1 contrast for its own text at every alpha. */
+.badge.success {
+  background: var(--theme-success);
+  color: var(--theme-on-accent);
+}
+.badge.warning {
+  background: var(--theme-warning);
+  color: var(--theme-on-accent);
+}
+.badge.danger {
+  background: var(--theme-danger);
+  color: var(--theme-on-accent);
+}
+
+/* No colour of its own: a per-record colour a person chose doesn't fit .badge's three fixed tones, so the consumer supplies it inline or via a custom property. */
+.dot {
+  block-size: 0.5rem;
+  border-radius: var(--theme-radius-pill);
+  display: inline-block;
+  flex-shrink: 0;
+  inline-size: 0.5rem;
+}
+
+/* prefers-reduced-motion below already forces this animation to 0.01ms, so no separate carve-out is needed here. */
+.spinner {
+  animation: spinner-rotate 0.6s linear infinite;
+  block-size: var(--theme-icon-md);
+  border: 2px solid var(--theme-control-border);
+  border-radius: var(--theme-radius-pill);
+  border-top-color: var(--theme-accent);
+  display: inline-block;
+  flex-shrink: 0;
+  inline-size: var(--theme-icon-md);
+}
+@keyframes spinner-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---- Reduced motion & print ---- */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}

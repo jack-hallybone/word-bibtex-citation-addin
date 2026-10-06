@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- `connect-src 'self'` is the data-leak control: never loosen it — if Office.js fails to initialise on some host, loosen `script-src` only. -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self';
+               script-src 'self' https://appsforoffice.microsoft.com;
+               connect-src 'self';
+               img-src 'self' data:;
+               style-src 'self';
+               font-src 'self' data:;
+               object-src 'none';
+               base-uri 'self';
+               form-action 'none';"
+    />
+    <title>__PRODUCT_NAME__ — BibTeX for Word</title>
+    <link rel="icon" href="./assets/icon-source.svg" type="image/svg+xml" />
+    <link rel="alternate icon" href="./assets/icon-32.png" sizes="32x32" />
+    <!-- Microsoft requires Office.js be loaded from their CDN, not bundled. -->
+    <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+    <link rel="stylesheet" href="taskpane.css" />
+  </head>
+  <body>
+    <main id="app" class="stack">
+      <header>
+        <h1>__PRODUCT_NAME__</h1>
+        <p class="text-muted">
+          Cite from a BibTeX file &mdash; the file stays your source of truth.
+        </p>
+      </header>
+
+      <section class="panel stack" aria-labelledby="source-heading">
+        <h2 id="source-heading">Source and style</h2>
+        <button id="open-bib" class="primary" type="button" disabled>
+          Open .bib file&hellip;
+        </button>
+        <p id="source-status" class="text-muted" role="status">
+          Starting Word integration&hellip;
+        </p>
+        <label class="field" for="style-select">
+          <span class="field-label">Citation style</span>
+          <select id="style-select" disabled></select>
+        </label>
+      </section>
+
+      <section
+        class="panel stack"
+        id="library-panel"
+        aria-labelledby="library-heading"
+        hidden
+      >
+        <div class="row">
+          <h2 id="library-heading" class="grow">References</h2>
+          <span id="selection-status" class="text-muted" aria-live="polite"
+            >0 selected</span
+          >
+        </div>
+        <label class="sr-only" for="filter">Filter references</label>
+        <input
+          id="filter"
+          type="search"
+          autocomplete="off"
+          placeholder="Filter by key, author, title&hellip;"
+        />
+        <ul id="entry-list" class="list panel"></ul>
+        <div class="field" id="locator-field">
+          <label class="field-label" for="locator"
+            >Page or other location (optional)</label
+          >
+          <div class="row nowrap">
+            <select id="locator-label" aria-label="Location type"></select>
+            <input
+              id="locator"
+              class="grow"
+              type="text"
+              autocomplete="off"
+              spellcheck="false"
+              placeholder="e.g. 12 or 12-15"
+            />
+          </div>
+        </div>
+        <label class="field" for="citation-form" id="form-field">
+          <span class="field-label">Form</span>
+          <select id="citation-form"></select>
+        </label>
+        <p id="details-note" class="text-muted text-sm" hidden>
+          A page and form apply to a citation of one reference.
+        </p>
+        <div class="row">
+          <button id="insert-citation" class="primary" type="button" disabled>
+            Insert citation
+          </button>
+          <button id="clear-selection" class="ghost" type="button" disabled>
+            Clear
+          </button>
+        </div>
+      </section>
+
+      <section
+        class="panel stack"
+        id="doc-panel"
+        aria-labelledby="document-heading"
+        hidden
+      >
+        <h2 id="document-heading">Document</h2>
+        <p class="text-muted text-sm">
+          Every insert, refresh, style change and .bib load rewrites all
+          citations and the bibliography, replacing anything typed inside them.
+          Set a citation&rsquo;s page and form when you insert it; to change
+          them, delete the citation and insert it again. Type anything else
+          outside the citation.
+        </p>
+        <button id="insert-bibliography" type="button">
+          Insert or refresh bibliography
+        </button>
+        <button id="refresh-doc" type="button">Refresh all citations</button>
+      </section>
+
+      <section
+        id="messages"
+        class="stack"
+        aria-label="Activity messages"
+        aria-live="polite"
+        aria-relevant="additions"
+      ></section>
+
+      <footer class="stack">
+        <p class="text-muted">
+          Read-only: __PRODUCT_NAME__ never writes to your .bib file.
+        </p>
+        <div class="row border-top text-muted text-xs">
+          <a
+            class="grow text-muted"
+            href="https://jack-hallybone.github.io/"
+            target="_blank"
+            rel="noopener noreferrer"
+            >Made by Jack (and the machines)</a
+          >
+          <a
+            class="text-muted"
+            href="THIRD-PARTY-NOTICES.md"
+            target="_blank"
+            rel="noopener noreferrer"
+            >Third-party notices</a
+          >
+          <span id="version">v. dev</span>
+        </div>
+        <p class="text-muted">
+          Citations by citeproc-js and bibliojson; styles from the Citation
+          Style Language project.
+        </p>
+      </footer>
+    </main>
+    <script type="module" src="./taskpane.ts"></script>
+  </body>
+</html>
